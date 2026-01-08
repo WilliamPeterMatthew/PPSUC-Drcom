@@ -1,0 +1,41 @@
+name: Build and Release PPSUC Drcom EXE
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 pyinstaller
+
+      - name: Build login.exe
+        run: |
+          pyinstaller -F -w login.py --icon=icon.ico
+
+      - name: Build logout.exe
+        run: |
+          pyinstaller -F -w logout.py --icon=icon.ico
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/login.exe
+            dist/logout.exe
+            账号密码.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
